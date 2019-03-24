@@ -163,7 +163,7 @@ void parse_config(FILE* config_file)
         }
         else if(sscanf(buffer, "%15s %60s", command, theme_folder_name) == 2)
         {
-            if(!strcmp("theme", command));
+            if(!strcmp("theme", command))
             {
                 printf("theme %s\n", theme_folder_name);
                 sprintf(theme_template, "sdmc:/fbwodata/%s/%%s", theme_folder_name);
@@ -356,11 +356,12 @@ int main()
     cfg.lines_per_lvl = 10;
     cfg.ARS = 0;
     cfg.ARE_delay = 0;
+    cfg.ghost_piece = 1;
     level = 1;
-	// level:             1   2   3   4   5   6   7   8  9  10 11 12 13 14 15 16 17 19 20 
-    static const u32 fpd[] = {30, 28, 27, 24, 20, 15, 10, 8, 5, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1};
+    // level:                 1   2   3   4   5   6   7   8  9  10 11 12 13 14 15 16 17 18 19 20 
+    static const u32 fpd[] = {30, 28, 27, 24, 20, 15, 10, 8, 5, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     memcpy(cfg.frames_per_drop, fpd, sizeof(u32)*20); 
-	// level:             1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17  18  19  20
+    // level:                 1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17  18  19  20
     static const u32 rpd[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 4, 6, 8, 10, 12, 15, 20};
     memcpy(cfg.rows_per_drop, rpd, sizeof(u32)*20); 
 

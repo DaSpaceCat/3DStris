@@ -921,7 +921,7 @@ void glue()
         case 0: //no lines? try to deploy a new one
 	    if(!cfg.ARS && in_play->type == T_TYPE && last_T_rotation && T_corners_occupied() >= 3)
 	    {
-		score_to_add = level * last_T_kick ? 100 : 400;
+		score_to_add = last_T_kick ? 100 : 400;
 		indicator = TSPIN;
 		back_to_back_flag = 0;
 	    }
@@ -931,7 +931,7 @@ void glue()
         case 1:
 	    if(!cfg.ARS && in_play->type == T_TYPE && last_T_rotation && T_corners_occupied() >= 3)
 	    {
-		score_to_add = level * last_T_kick ? 200 : 800;
+		score_to_add = last_T_kick ? 200 : 800;
 		back_to_back_flag = 1;
 		indicator = TSPINSINGLE;
    	    }
