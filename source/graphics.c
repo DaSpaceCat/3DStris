@@ -1,22 +1,37 @@
 #include "graphics.h"
-#include <sf2d.h>
-#include <sfil.h>
 #include <stdio.h>
 #include <stdbool.h>
 
 #define CONFIG_3D_SLIDERSTATE (*(float*)0x1FF81080)
 
+static C3D_RenderTarget *top_left;
+static C3D_RenderTarget *top_right;
+static C2D_SpriteSheet spritesheet;
+
 void render_frames()
 {
-    sf2d_start_frame(GFX_TOP, GFX_LEFT);
+	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+	C2D_TargetClear(top_left, C2D_Color32(0x00, 0x00, 0x00, 0xFF));
+	C2D_SceneBegin(top_left);
 	render_frame(0);
-    sf2d_end_frame();
-    if(CONFIG_3D_SLIDERSTATE != 0)
-    {
-	sf2d_start_frame(GFX_TOP, GFX_RIGHT);
-	    render_frame(CONFIG_3D_SLIDERSTATE * 10.0f);
-	sf2d_end_frame();
-    }
+
+	if(CONFIG_3D_SLIDERSTATE != 0)
+	{
+		C2D_TargetClear(top_right, C2D_Color32(0x00, 0x00, 0x00, 0xFF));
+		C2D_SceneBegin(top_right);
+		render_frame(CONFIG_3D_SLIDERSTATE * 10.0f);
+	}
+	C3D_FrameEnd(0);
+}
+
+void drawimage_tinted(C2D_Image img, float x, float y, C2D_ImageTint *tint)
+{
+	C2D_DrawImageAt(img, x, y, 0.5f, tint, 1.0f, 1.0f);
+}
+
+void drawimage(C2D_Image img, float x, float y)
+{
+	C2D_DrawImageAt(img, x, y, 0.5f, NULL, 1.0f, 1.0f);
 }
 
 void render_grid_blocks(int offset)
@@ -29,7 +44,7 @@ void render_grid_blocks(int offset)
 	    {
 		int type;
 		if((type = level_grid[j][i]))
-		    sf2d_draw_texture(blocks[type-1], grid.posx + blocks[type-1]->width * j + offset, grid.posy + blocks[type-1]->height * (i-4));
+		    drawimage(blocks[type-1], grid.posx + blocks[type-1].subtex->width * j + offset, grid.posy + blocks[type-1].subtex->height * (i-4));
 	    }
 	}
 }
@@ -40,97 +55,97 @@ void render_frame(int offset)
         {
             case MODE_TETRIS:
                 //stuff that happens always first
-                sf2d_draw_texture(background.texture, background.posx, background.posy);
-                sf2d_draw_texture(grid.texture, grid.posx + offset, grid.posy);
-                sf2d_draw_texture(score_text.texture, score_text.posx, score_text.posy);
+                drawimage(background.img, background.posx, background.posy);
+                drawimage(grid.img, grid.posx + offset, grid.posy);
+                drawimage(score_text.img, score_text.posx, score_text.posy);
                 u32 score_temp = score;
                 u8 i = 9;
                 do{ //"do" so it can display '0' too
                     s32 digit = score_temp % 10;
                     score_temp /= 10;
-                    sf2d_draw_texture(score_num[digit], score_text.posx + score_text.texture->width+score_num[digit]->width*i, score_text.posy);
+                    drawimage(score_num[digit], score_text.posx + score_text.img.subtex->width+score_num[digit].subtex->width*i, score_text.posy);
                     i--;
                 }
                 while(score_temp);
 		//high score too
-                sf2d_draw_texture(hiscore_text.texture, hiscore_text.posx, hiscore_text.posy);
+                drawimage(hiscore_text.img, hiscore_text.posx, hiscore_text.posy);
                 score_temp = high_score;
                 i = 9;
                 do{ //"do" so it can display '0' too
                     s32 digit = score_temp % 10;
                     score_temp /= 10;
-                    sf2d_draw_texture(score_num[digit], hiscore_text.posx + hiscore_text.texture->width+score_num[digit]->width*i, hiscore_text.posy);
+                    drawimage(score_num[digit], hiscore_text.posx + hiscore_text.img.subtex->width+score_num[digit].subtex->width*i, hiscore_text.posy);
                     i--;
                 }
                 while(score_temp);
 
                 //level
-                sf2d_draw_texture(level_frame.texture, level_frame.posx + (offset >> 1), level_frame.posy);
+                drawimage(level_frame.img, level_frame.posx + (offset >> 1), level_frame.posy);
                 if(level >= 10)
                 {
-                    sf2d_draw_texture(
-                                        misc_num[level/10],
-                                        level_frame.posx + (level_frame.texture->width>>1) - misc_num[level/10]->width + offset,
-                                        level_frame.posy + digit_offset_levely
-                                     );
-                    sf2d_draw_texture(
-                                        misc_num[level%10],
-                                        level_frame.posx + (level_frame.texture->width>>1) + offset,
-                                        level_frame.posy + digit_offset_levely
-                                     );
+                    drawimage(
+                              misc_num[level/10],
+                              level_frame.posx + (level_frame.img.subtex->width>>1) - misc_num[level/10].subtex->width + offset,
+                              level_frame.posy + digit_offset_levely
+                              );
+                    drawimage(
+                              misc_num[level%10],
+                              level_frame.posx + (level_frame.img.subtex->width>>1) + offset,
+                              level_frame.posy + digit_offset_levely
+                              );
                 }
                 else
-                    sf2d_draw_texture(
-                                        misc_num[level],
-                                        level_frame.posx + ((level_frame.texture->width>>1) - (misc_num[level]->width>>1)) + offset,
-                                        level_frame.posy + digit_offset_levely
-                                     );
+                    drawimage(
+                              misc_num[level],
+                              level_frame.posx + ((level_frame.img.subtex->width>>1) - (misc_num[level].subtex->width>>1)) + offset,
+                              level_frame.posy + digit_offset_levely
+                              );
                 //lines
-                sf2d_draw_texture(lines_frame.texture, lines_frame.posx + (offset >> 1), lines_frame.posy);
+                drawimage(lines_frame.img, lines_frame.posx + (offset >> 1), lines_frame.posy);
                 if(total_lines >= 100)
                 {
 		    int currentnum = total_lines;
 		//last digit
-		    sf2d_draw_texture(
-                                        misc_num[currentnum%10],
-                                        lines_frame.posx + (lines_frame.texture->width>>1) + (misc_num[currentnum%10]->width>>1) + offset,
-                                        lines_frame.posy + digit_offset_linesy
-                                     );
+                    drawimage(
+                              misc_num[currentnum%10],
+                              lines_frame.posx + (lines_frame.img.subtex->width>>1) + (misc_num[currentnum%10].subtex->width>>1) + offset,
+                              lines_frame.posy + digit_offset_linesy
+                              );
 		    currentnum = currentnum/10;
 		//middle digit
-		    sf2d_draw_texture(
-                                        misc_num[currentnum%10],
-                                        lines_frame.posx + (lines_frame.texture->width>>1) - (misc_num[currentnum%10]->width>>1) + offset,
-                                        lines_frame.posy + digit_offset_linesy
-                                     );
+                    drawimage(
+                              misc_num[currentnum%10],
+                              lines_frame.posx + (lines_frame.img.subtex->width>>1) - (misc_num[currentnum%10].subtex->width>>1) + offset,
+                              lines_frame.posy + digit_offset_linesy
+                              );
 		    currentnum = currentnum/10;
 		//first digit (actually this way it won't crash after getting >999, just won't display the number of thousands)
-		    sf2d_draw_texture(
-                                        misc_num[currentnum%10],
-                                        lines_frame.posx + (lines_frame.texture->width>>1) - (misc_num[currentnum%10]->width>>1) - misc_num[currentnum%10]->width + offset,
-                                        lines_frame.posy + digit_offset_linesy
-                                     );
+                    drawimage(
+                              misc_num[currentnum%10],
+                              lines_frame.posx + (lines_frame.img.subtex->width>>1) - (misc_num[currentnum%10].subtex->width>>1) - misc_num[currentnum%10].subtex->width + offset,
+                              lines_frame.posy + digit_offset_linesy
+                              );
                     
                 }
                 else if(total_lines >= 10)
                 {
-                    sf2d_draw_texture(
-                                        misc_num[total_lines/10],
-                                        lines_frame.posx + (lines_frame.texture->width>>1) - misc_num[total_lines/10]->width + offset,
-                                        lines_frame.posy + digit_offset_linesy
-                                     );
-                    sf2d_draw_texture(
-                                        misc_num[total_lines%10],
-                                        lines_frame.posx + (lines_frame.texture->width>>1) + offset,
-                                        lines_frame.posy + digit_offset_linesy
-                                     );
+                    drawimage(
+                              misc_num[total_lines/10],
+                              lines_frame.posx + (lines_frame.img.subtex->width>>1) - misc_num[total_lines/10].subtex->width + offset,
+                              lines_frame.posy + digit_offset_linesy
+                              );
+                    drawimage(
+                              misc_num[total_lines%10],
+                              lines_frame.posx + (lines_frame.img.subtex->width>>1) + offset,
+                              lines_frame.posy + digit_offset_linesy
+                              );
                 }
                 else
-                    sf2d_draw_texture(
-                                        misc_num[total_lines],
-                                        lines_frame.posx + ((lines_frame.texture->width>>1) - (misc_num[total_lines]->width>>1)) + offset,
-                                        lines_frame.posy + digit_offset_linesy
-                                     );
+                    drawimage(
+                              misc_num[total_lines],
+                              lines_frame.posx + ((lines_frame.img.subtex->width>>1) - (misc_num[total_lines].subtex->width>>1)) + offset,
+                              lines_frame.posy + digit_offset_linesy
+                              );
                 if(!paused && !gameover)
                 {
 		    if(controllable && !ARE_state)
@@ -143,29 +158,29 @@ void render_frame(int offset)
 		    }
                     if(cfg.hold)
                     {
-                        sf2d_draw_texture(hold_frame.texture, hold_frame.posx + (offset >> 1), hold_frame.posy);
+                        drawimage(hold_frame.img, hold_frame.posx + (offset >> 1), hold_frame.posy);
 			if(hold)
-                        sf2d_draw_texture(tetriminos[hold->type], hold_frame.posx + block_offset_holdx + offset, hold_frame.posy + block_offset_holdy);
+                        drawimage(tetriminos[hold->type], hold_frame.posx + block_offset_holdx + offset, hold_frame.posy + block_offset_holdy);
                     }
                     if(cfg.next_displayed)
                     {
-                        sf2d_draw_texture(next_frame[0].texture, next_frame[0].posx + (offset >> 1), next_frame[0].posy);
-                        sf2d_draw_texture(next_text.texture, next_text.posx + (offset >> 1), next_text.posy);
-                        sf2d_draw_texture(
-                                            tetriminos[next_blocks->tetrimino->type],
-                                            next_frame[0].posx + block_offset_nextx + offset,
-                                            next_frame[0].posy + block_offset_nexty
-                                         );
+                        drawimage(next_frame[0].img, next_frame[0].posx + (offset >> 1), next_frame[0].posy);
+                        drawimage(next_text.img, next_text.posx + (offset >> 1), next_text.posy);
+                        drawimage(
+                                  tetriminos[next_blocks->tetrimino->type],
+                                  next_frame[0].posx + block_offset_nextx + offset,
+                                  next_frame[0].posy + block_offset_nexty
+                                  );
                         Tetrimino_list* element = next_blocks;
                         for(int i = 1; i < cfg.next_displayed; ++i)
                         {
                             element = element->next;
-                            sf2d_draw_texture(next_frame[i].texture, next_frame[i].posx + (offset >> 1), next_frame[i].posy);
-                            sf2d_draw_texture(
-                                            tetriminos[element->tetrimino->type],
-                                            next_frame[i].posx + block_offset_nextx + offset,
-                                            next_frame[i].posy + block_offset_nexty
-                                             );
+                            drawimage(next_frame[i].img, next_frame[i].posx + (offset >> 1), next_frame[i].posy);
+                            drawimage(
+                                      tetriminos[element->tetrimino->type],
+                                      next_frame[i].posx + block_offset_nextx + offset,
+                                      next_frame[i].posy + block_offset_nexty
+                                      );
                         }
                     }
 
@@ -197,13 +212,14 @@ void render_frame(int offset)
                             {
                                 if(full_lines[i])
                                 {
-                                    sf2d_draw_rectangle(
-                                                        grid.posx + offset,
-                                                        grid.posy + (i-4) * blocks[0]->height,
-                                                        grid.texture->width,
-                                                        blocks[0]->height,
-                                                        RGBA8(rand() % 255, rand() % 255, rand() % 255, rand() % 255)
-                                                       );
+                                    C2D_DrawRectSolid(
+                                        grid.posx + offset,
+                                        grid.posy + (i-4) * blocks[0].subtex->height,
+                                        0.5f,
+                                        grid.img.subtex->width,
+                                        blocks[0].subtex->height,
+                                        C2D_Color32(rand() % 255, rand() % 255, rand() % 255, rand() % 255)
+                                    );
                                 }
                             }
                             remove_line_count++;
@@ -217,23 +233,23 @@ void render_frame(int offset)
 			    indicator_frames = 0;
 			    break;
 			case TETRIS:
-			    if(tetris_indicator)
-				sf2d_draw_texture(
+			    if(tetris_indicator.tex)
+				drawimage(
 					   	  tetris_indicator,
 						  indicatorx + offset,
 						  indicatory
 						 );
-			    if(back_to_back_flag_old && backtoback_indicator)
-				sf2d_draw_texture(
+			    if(back_to_back_flag_old && backtoback_indicator.tex)
+				drawimage(
 					   	  backtoback_indicator,
 						  indicatorx + offset,
-						  indicatory + tetris_indicator->height
+						  indicatory + tetris_indicator.subtex->height
 						 );
 			    indicator_frames++;
 			    break;
 			case TSPIN:
-			    if(tspin_indicator)
-				sf2d_draw_texture(
+			    if(tspin_indicator.tex)
+				drawimage(
 					   	  tspin_indicator,
 						  indicatorx + offset,
 						  indicatory
@@ -241,47 +257,47 @@ void render_frame(int offset)
 			    indicator_frames++;
 			    break;
 			case TSPINSINGLE:
-			    if(tspinsingle_indicator)
-				sf2d_draw_texture(
+			    if(tspinsingle_indicator.tex)
+				drawimage(
 					   	  tspinsingle_indicator,
 						  indicatorx + offset,
 						  indicatory
 						 );
-			    if(back_to_back_flag_old && backtoback_indicator)
-				sf2d_draw_texture(
+			    if(back_to_back_flag_old && backtoback_indicator.tex)
+				drawimage(
 					   	  backtoback_indicator,
 						  indicatorx + offset,
-						  indicatory + tspinsingle_indicator->height
+						  indicatory + tspinsingle_indicator.subtex->height
 						 );
 			    indicator_frames++;
 			    break;
 			case TSPINDOUBLE:
-			    if(tspindouble_indicator)
-				sf2d_draw_texture(
+			    if(tspindouble_indicator.tex)
+				drawimage(
 					   	  tspindouble_indicator,
 						  indicatorx + offset,
 						  indicatory
 						 );
-			    if(back_to_back_flag_old && backtoback_indicator)
-				sf2d_draw_texture(
+			    if(back_to_back_flag_old && backtoback_indicator.tex)
+				drawimage(
 					   	  backtoback_indicator,
 						  indicatorx + offset,
-						  indicatory + tspindouble_indicator->height
+						  indicatory + tspindouble_indicator.subtex->height
 						 );
 			    indicator_frames++;
 			    break;
 			case TSPINTRIPLE:
-			    if(tspintriple_indicator)
-				sf2d_draw_texture(
+			    if(tspintriple_indicator.tex)
+				drawimage(
 					   	  tspintriple_indicator,
 						  indicatorx + offset,
 						  indicatory
 						 );
-			    if(back_to_back_flag_old && backtoback_indicator)
-				sf2d_draw_texture(
+			    if(back_to_back_flag_old && backtoback_indicator.tex)
+				drawimage(
 					   	  backtoback_indicator,
 						  indicatorx + offset,
-						  indicatory + tspintriple_indicator->height
+						  indicatory + tspintriple_indicator.subtex->height
 						 );
 			    indicator_frames++;
 			    break;
@@ -290,12 +306,12 @@ void render_frame(int offset)
                 }//end not paused/gameover if
                 else if(paused)
                 {
-                    sf2d_draw_texture(paused_text, 200 - (paused_text->width>>1) + offset, 120 - (paused_text->height>>1));
+                    drawimage(paused_text, 200 - (paused_text.subtex->width>>1) + offset, 120 - (paused_text.subtex->height>>1));
                 }
                 else //must be game over
                 {
 		    render_grid_blocks(offset);
-                    sf2d_draw_texture(gameover_text, 200 - (gameover_text->width>>1) + offset, 120 - (gameover_text->height>>1));
+                    drawimage(gameover_text, 200 - (gameover_text.subtex->width>>1) + offset, 120 - (gameover_text.subtex->height>>1));
 
                 }
 
@@ -310,260 +326,106 @@ Returns if the load was successful or not.j
 */
 int load_textures(const char* str_template)
 {
-    char buffer[80];
-    //load background
-    sprintf(buffer, str_template, "background.png");
-    background.texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    background.posx = 0;
-    background.posy = 0;
-    if(!background.texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
-    sprintf(buffer, str_template, "grid.png");
-    grid.texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    grid.posx = DEFAULT_GRIDX;
-    grid.posy = DEFAULT_GRIDY;
-    if(!grid.texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	char buffer[80];
 
-    sprintf(buffer, str_template, "next_text.png");
-    next_text.texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    next_text.posx = DEFAULT_NEXT_TEXTX;
-    next_text.posy = DEFAULT_NEXT_TEXTY;
-    if(!next_text.texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	//load spritesheet
+	sprintf(buffer, str_template, "theme.t3x");
+	spritesheet = C2D_SpriteSheetLoad(buffer);
+	if (!spritesheet) {
+		printf("error loading %s\n", buffer);
+		return 0;
+	}
+	size_t num_images = C2D_SpriteSheetCount(spritesheet);
+	int idx = 0, i;
 
-    sprintf(buffer, str_template, "next_frame0.png");
-    next_frame[0].texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    next_frame[0].posx = DEFAULT_NEXT_FRAME_1X;
-    next_frame[0].posy = DEFAULT_NEXT_FRAME_1Y;
-    if(!next_frame[0].texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	background.posx = 0;
+	background.posy = 0;
+	background.img = C2D_SpriteSheetGetImage(spritesheet, idx++);
 
-    sprintf(buffer, str_template, "next_frame1.png");
-    next_frame[1].texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    next_frame[1].posx = DEFAULT_NEXT_FRAME_2X;
-    next_frame[1].posy = DEFAULT_NEXT_FRAME_2Y;
-    if(!next_frame[1].texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	grid.posx = DEFAULT_GRIDX;
+	grid.posy = DEFAULT_GRIDY;
+	grid.img = C2D_SpriteSheetGetImage(spritesheet, idx++);
 
-    sprintf(buffer, str_template, "next_frame2.png");
-    next_frame[2].texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    next_frame[2].posx = DEFAULT_NEXT_FRAME_3X;
-    next_frame[2].posy = DEFAULT_NEXT_FRAME_3Y;
-    if(!next_frame[2].texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	next_text.posx = DEFAULT_NEXT_TEXTX;
+	next_text.posy = DEFAULT_NEXT_TEXTY;
+	next_text.img = C2D_SpriteSheetGetImage(spritesheet, idx++);
 
-    sprintf(buffer, str_template, "next_frame3.png");
-    next_frame[3].texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    next_frame[3].posx = DEFAULT_NEXT_FRAME_4X;
-    next_frame[3].posy = DEFAULT_NEXT_FRAME_4Y;
-    if(!next_frame[3].texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	for(i = 0; i < 6; ++i)
+	{
+		next_frame[i].posx = DEFAULT_NEXT_FRAME_X[i];
+		next_frame[i].posy = DEFAULT_NEXT_FRAME_Y[i];
+		next_frame[i].img = C2D_SpriteSheetGetImage(spritesheet, idx++);
+	}
 
-    sprintf(buffer, str_template, "next_frame4.png");
-    next_frame[4].texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    next_frame[4].posx = DEFAULT_NEXT_FRAME_5X;
-    next_frame[4].posy = DEFAULT_NEXT_FRAME_5Y;
-    if(!next_frame[4].texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	score_text.posx = DEFAULT_SCORE_TEXTX;
+	score_text.posy = DEFAULT_SCORE_TEXTY;
+	score_text.img = C2D_SpriteSheetGetImage(spritesheet, idx++);
 
-    sprintf(buffer, str_template, "next_frame5.png");
-    next_frame[5].texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    next_frame[5].posx = DEFAULT_NEXT_FRAME_6X;
-    next_frame[5].posy = DEFAULT_NEXT_FRAME_6Y;
-    if(!next_frame[5].texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	hiscore_text.posx = DEFAULT_HISCORE_TEXTX;
+	hiscore_text.posy = DEFAULT_HISCORE_TEXTY;
+	hiscore_text.img = C2D_SpriteSheetGetImage(spritesheet, idx++);
 
-    sprintf(buffer, str_template, "score_text.png");
-    score_text.texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    score_text.posx = DEFAULT_SCORE_TEXTX;
-    score_text.posy = DEFAULT_SCORE_TEXTY;
-    if(!score_text.texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
-    sprintf(buffer, str_template, "hiscore_text.png");
-    hiscore_text.texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    hiscore_text.posx = DEFAULT_HISCORE_TEXTX;
-    hiscore_text.posy = DEFAULT_HISCORE_TEXTY;
-    if(!score_text.texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
-    sprintf(buffer, str_template, "lines_frame.png");
-    lines_frame.texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    lines_frame.posx = DEFAULT_LINES_FRAMEX;
-    lines_frame.posy = DEFAULT_LINES_FRAMEY;
-    if(!lines_frame.texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	lines_frame.posx = DEFAULT_LINES_FRAMEX;
+	lines_frame.posy = DEFAULT_LINES_FRAMEY;
+	lines_frame.img = C2D_SpriteSheetGetImage(spritesheet, idx++);
 
-    sprintf(buffer, str_template, "level_frame.png");
-    level_frame.texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    level_frame.posx = DEFAULT_LEVEL_FRAMEX;
-    level_frame.posy = DEFAULT_LEVEL_FRAMEY;
-    if(!level_frame.texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	level_frame.posx = DEFAULT_LEVEL_FRAMEX;
+	level_frame.posy = DEFAULT_LEVEL_FRAMEY;
+	level_frame.img = C2D_SpriteSheetGetImage(spritesheet, idx++);
 
-    sprintf(buffer, str_template, "hold_frame.png");
-    hold_frame.texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    hold_frame.posx = DEFAULT_HOLD_FRAMEX;
-    hold_frame.posy = DEFAULT_HOLD_FRAMEY;
-    if(!level_frame.texture)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
-    int i;
+	hold_frame.posx = DEFAULT_HOLD_FRAMEX;
+	hold_frame.posy = DEFAULT_HOLD_FRAMEY;
+	hold_frame.img = C2D_SpriteSheetGetImage(spritesheet, idx++);
 
-    char temp_buffer[80];
-    for(i = 0; i < 7; ++i)
-    {
-        sprintf(temp_buffer, "tetrimino%d.png", i);
-        sprintf(buffer, str_template, temp_buffer);
-        tetriminos[i] = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-        if(!tetriminos[i])
-        {
-            printf("error loading %s\n", buffer);
-            return 0;
-        }
-        sprintf(temp_buffer, "block%d.png", i);
-        sprintf(buffer, str_template, temp_buffer);
-        blocks[i] = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-        if(!blocks[i])
-        {
-            printf("error loading %s\n", buffer);
-            return 0;
-        }
-        sprintf(temp_buffer, "score_num%d.png", i);
-        sprintf(buffer, str_template, temp_buffer);
-        score_num[i] = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-        if(!score_num[i])
-        {
-            printf("error loading %s\n", buffer);
-            return 0;
-        }
-        sprintf(temp_buffer, "misc_num%d.png", i);
-        sprintf(buffer, str_template, temp_buffer);
-        misc_num[i] = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-        if(!misc_num[i])
-        {
-            printf("error loading %s\n", buffer);
-            return 0;
-        }
-    }
-    for (i = 7; i < 10; ++i)
-    {
-        sprintf(temp_buffer, "score_num%d.png", i);
-        sprintf(buffer, str_template, temp_buffer);
-        score_num[i] = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-        if(!score_num[i])
-        {
-            printf("error loading %s\n", buffer);
-            return 0;
-        }
-        sprintf(temp_buffer, "misc_num%d.png", i);
-        sprintf(buffer, str_template, temp_buffer);
-        misc_num[i] = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-        if(!misc_num[i])
-        {
-            printf("error loading %s\n", buffer);
-            return 0;
-        }
-    }
+	gameover_text = C2D_SpriteSheetGetImage(spritesheet, idx++);
+	paused_text = C2D_SpriteSheetGetImage(spritesheet, idx++);
 
-    sprintf(buffer, str_template, "gameover.png");
-    gameover_text = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    if(!gameover_text)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	for(i = 0; i < 7; ++i)
+		tetriminos[i] = C2D_SpriteSheetGetImage(spritesheet, idx++);
+	for(i = 0; i < 7; ++i)
+		blocks[i] = C2D_SpriteSheetGetImage(spritesheet, idx++);
+	for (i = 0; i < 10; ++i)
+		score_num[i] = C2D_SpriteSheetGetImage(spritesheet, idx++);
+	for (i = 0; i < 10; ++i)
+		misc_num[i] = C2D_SpriteSheetGetImage(spritesheet, idx++);
 
-    sprintf(buffer, str_template, "paused.png");
-    paused_text = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-    if(!paused_text)
-    {
-        printf("error loading %s\n", buffer);
-        return 0;
-    }
+	//these are not critical. if they are unavailable, I just won't render them, also for backwards compatibility.
+	if (num_images > 50)
+	{
+		printf("loading %d additional sprites.", num_images - 50);
+		tetris_indicator = C2D_SpriteSheetGetImage(spritesheet, idx++);
+		tspin_indicator = C2D_SpriteSheetGetImage(spritesheet, idx++);
+		tspinsingle_indicator = C2D_SpriteSheetGetImage(spritesheet, idx++);
+		tspindouble_indicator = C2D_SpriteSheetGetImage(spritesheet, idx++);
+		tspintriple_indicator = C2D_SpriteSheetGetImage(spritesheet, idx++);
+		backtoback_indicator = C2D_SpriteSheetGetImage(spritesheet, idx++);
+	}
+	block_offset_holdx = DEFAULT_OFFSET_HOLDX;
+	block_offset_holdy = DEFAULT_OFFSET_HOLDY;
+	block_offset_nextx = DEFAULT_OFFSET_NEXTX;
+	block_offset_nexty = DEFAULT_OFFSET_NEXTY;
+	digit_offset_linesy = DEFAULT_OFFSET_LNSY;
+	digit_offset_levely = DEFAULT_OFFSET_LVLY;
+	indicatorx = DEFAULT_POPUPX;
+	indicatory = DEFAULT_POPUPY;
+	indicator_frame_config = DEFAULT_POPUP_FRAME_CFG;
 
-//these are not critical. if they are unavailable, I just won't render them, also for backwards compatibility.
-
-    sprintf(buffer, str_template, "quadline.png");
-    tetris_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-
-    sprintf(buffer, str_template, "tspin.png");
-    tspin_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-
-    sprintf(buffer, str_template, "tspinsingle.png");
-    tspinsingle_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-
-    sprintf(buffer, str_template, "tspindouble.png");
-    tspindouble_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-
-    sprintf(buffer, str_template, "tspintriple.png");
-    tspintriple_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-
-    sprintf(buffer, str_template, "backtoback.png");
-    backtoback_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
-
-    block_offset_holdx = DEFAULT_OFFSET_HOLDX;
-    block_offset_holdy = DEFAULT_OFFSET_HOLDY;
-    block_offset_nextx = DEFAULT_OFFSET_NEXTX;
-    block_offset_nexty = DEFAULT_OFFSET_NEXTY;
-    digit_offset_linesy = DEFAULT_OFFSET_LNSY;
-    digit_offset_levely = DEFAULT_OFFSET_LVLY;
-    indicatorx = DEFAULT_POPUPX;
-    indicatory = DEFAULT_POPUPY;
-    indicator_frame_config = DEFAULT_POPUP_FRAME_CFG;
-    return 1;
+	return 1;
 }
-
 
 /*
 Initializes graphics.
 */
 void graphics_init()
 {
-    sf2d_init();
-    sf2d_set_clear_color(RGBA8(0x00, 0x00, 0x00, 0xFF));
-    gfxSet3D(1);
-    consoleInit(GFX_BOTTOM, NULL);
+	gfxInitDefault();
+	gfxSet3D(1);
+	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
+	C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
+	C2D_Prepare();
+	top_left = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
+	top_right = C2D_CreateScreenTarget(GFX_TOP, GFX_RIGHT);
+	consoleInit(GFX_BOTTOM, NULL);
 }
 
 /*
@@ -709,6 +571,8 @@ void graphics_parse_config(char* theme_template)
 
 void render_block(Tetrimino to_render, bool ghost_piece, bool lastdepl, int offset)
 {
+	C2D_ImageTint tint;
+
     if(!cfg.ARS)
     {//SRS
 	    if(to_render.type != I_TYPE)
@@ -721,14 +585,18 @@ void render_block(Tetrimino to_render, bool ghost_piece, bool lastdepl, int offs
 		        {
 			    if(to_render.posy + j < 4)
 				continue;
-		            s32 x = grid.posx + blocks[to_render.type]->width * (to_render.posx + i) + offset;
-		            s32 y = grid.posy + blocks[to_render.type]->height * (to_render.posy - 4 + j);
-		            if(ghost_piece)
-		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0x88AAAAAA);
-		            else if(lastdepl)
-		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0xFFFFFFFF);
-		            else
-		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0xFFDDDDDD);
+                            s32 x = grid.posx + blocks[to_render.type].subtex->width * (to_render.posx + i) + offset;
+                            s32 y = grid.posy + blocks[to_render.type].subtex->height * (to_render.posy - 4 + j);
+                            if(ghost_piece) {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xAA, 0xAA, 0xAA, 0x88), 0.5f);
+                                drawimage_tinted(blocks[to_render.type], x, y, &tint);
+                            } else if(lastdepl) {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xFF, 0xFF, 0xFF, 0xFF), 0.5f);
+                                drawimage_tinted(blocks[to_render.type], x, y, &tint);
+                            } else {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xDD, 0xDD, 0xDD, 0xFF), 0.5f);
+                                drawimage_tinted(blocks[to_render.type], x, y, &tint);
+                            }
 		        }
 		    }
 	    }
@@ -742,14 +610,18 @@ void render_block(Tetrimino to_render, bool ghost_piece, bool lastdepl, int offs
 		        {
 			    if(to_render.posy + j < 4)
 				continue;
-		            s32 x = grid.posx + blocks[I_TYPE]->height * (to_render.posx + i) + offset;
-		            s32 y = grid.posy + blocks[I_TYPE]->width * (to_render.posy - 4 + j);
-		            if(ghost_piece)
-		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0x88AAAAAA);
-		            else if(lastdepl)
-		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0xFFFFFFFF);
-		            else
-		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0xFFDDDDDD);
+                            s32 x = grid.posx + blocks[I_TYPE].subtex->height * (to_render.posx + i) + offset;
+                            s32 y = grid.posy + blocks[I_TYPE].subtex->width * (to_render.posy - 4 + j);
+                            if(ghost_piece) {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xAA, 0xAA, 0xAA, 0x88), 0.5f);
+                                drawimage_tinted(blocks[I_TYPE], x, y, &tint);
+                            } else if(lastdepl) {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xFF, 0xFF, 0xFF, 0xFF), 0.5f);
+                                drawimage_tinted(blocks[I_TYPE], x, y, &tint);
+                            } else {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xDD, 0xDD, 0xDD, 0xFF), 0.5f);
+                                drawimage_tinted(blocks[I_TYPE], x, y, &tint);
+                            }
 		        }
 		    }
 	    }
@@ -766,14 +638,18 @@ void render_block(Tetrimino to_render, bool ghost_piece, bool lastdepl, int offs
 		        {
 			    if(to_render.posy + j < 4)
 				continue;
-		            s32 x = grid.posx + blocks[to_render.type]->width * (to_render.posx + i) + offset;
-		            s32 y = grid.posy + blocks[to_render.type]->height * (to_render.posy - 4 + j);
-		            if(ghost_piece)
-		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0x88AAAAAA);
-		            else if(lastdepl)
-		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0xFFFFFFFF);
-		            else
-		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0xFFDDDDDD);
+                            s32 x = grid.posx + blocks[to_render.type].subtex->width * (to_render.posx + i) + offset;
+                            s32 y = grid.posy + blocks[to_render.type].subtex->height * (to_render.posy - 4 + j);
+                            if(ghost_piece) {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xAA, 0xAA, 0xAA, 0x88), 0.5f);
+                                drawimage_tinted(blocks[to_render.type], x, y, &tint);
+                            } else if(lastdepl) {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xFF, 0xFF, 0xFF, 0xFF), 0.5f);
+                                drawimage_tinted(blocks[to_render.type], x, y, &tint);
+                            } else {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xDD, 0xDD, 0xDD, 0xFF), 0.5f);
+                                drawimage_tinted(blocks[to_render.type], x, y, &tint);
+                            }
 		        }
 		    }
 	    }
@@ -787,14 +663,18 @@ void render_block(Tetrimino to_render, bool ghost_piece, bool lastdepl, int offs
 		        {
 			    if(to_render.posy + j < 4)
 				continue;
-		            s32 x = grid.posx + blocks[I_TYPE]->height * (to_render.posx + i) + offset;
-		            s32 y = grid.posy + blocks[I_TYPE]->width * (to_render.posy - 4 + j);
-		            if(ghost_piece)
-		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0x88AAAAAA);
-		            else if(lastdepl)
-		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0xFFFFFFFF);
-		            else
-		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0xFFDDDDDD);
+                            s32 x = grid.posx + blocks[I_TYPE].subtex->height * (to_render.posx + i) + offset;
+                            s32 y = grid.posy + blocks[I_TYPE].subtex->width * (to_render.posy - 4 + j);
+                            if(ghost_piece) {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xAA, 0xAA, 0xAA, 0x88), 0.5f);
+                                drawimage_tinted(blocks[I_TYPE], x, y, &tint);
+                            } else if(lastdepl) {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xFF, 0xFF, 0xFF, 0xFF), 0.5f);
+                                drawimage_tinted(blocks[I_TYPE], x, y, &tint);
+                            } else {
+                                C2D_PlainImageTint(&tint, C2D_Color32(0xDD, 0xDD, 0xDD, 0xFF), 0.5f);
+                                drawimage_tinted(blocks[I_TYPE], x, y, &tint);
+                            }
 		        }
 		    }
 	    }
@@ -802,30 +682,9 @@ void render_block(Tetrimino to_render, bool ghost_piece, bool lastdepl, int offs
 }
 void graphics_fini()
 {
-    sf2d_free_texture(background.texture);
-    sf2d_free_texture(next_text.texture);
-    sf2d_free_texture(grid.texture);
-    sf2d_free_texture(score_text.texture);
-    sf2d_free_texture(lines_frame.texture);
-    sf2d_free_texture(level_frame.texture);
-    sf2d_free_texture(hold_frame.texture);
-    int i = 0;
-    for (; i < 6; ++i)
-    {
-        sf2d_free_texture(next_frame[i].texture);
-        sf2d_free_texture(tetriminos[i]);
-        sf2d_free_texture(blocks[i]);
-        sf2d_free_texture(score_num[i]);
-        sf2d_free_texture(misc_num[i]);
-    }
-    sf2d_free_texture(tetriminos[6]);
-    sf2d_free_texture(blocks[6]);
-    for (; i < 10; ++i)
-    {
-        sf2d_free_texture(score_num[i]);
-        sf2d_free_texture(misc_num[i]);
-    }
-    sf2d_free_texture(gameover_text);
-    sf2d_free_texture(paused_text);
-    sf2d_fini();
+	C2D_SpriteSheetFree(spritesheet);
+
+	C2D_Fini();
+	C3D_Fini();
+	gfxExit();
 }

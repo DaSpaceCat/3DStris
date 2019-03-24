@@ -3,7 +3,7 @@
 
 #include "level.h"
 #include "structs.h"
-#include <sf2d.h>
+#include <citro2d.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,23 +14,8 @@
 #define DEFAULT_NEXT_TEXTX      260
 #define DEFAULT_NEXT_TEXTY      55
 
-#define DEFAULT_NEXT_FRAME_1X   260
-#define DEFAULT_NEXT_FRAME_1Y   20
-
-#define DEFAULT_NEXT_FRAME_2X   295
-#define DEFAULT_NEXT_FRAME_2Y   20
-
-#define DEFAULT_NEXT_FRAME_3X   330
-#define DEFAULT_NEXT_FRAME_3Y   20
-
-#define DEFAULT_NEXT_FRAME_4X   365
-#define DEFAULT_NEXT_FRAME_4Y   20
-
-#define DEFAULT_NEXT_FRAME_5X   365
-#define DEFAULT_NEXT_FRAME_5Y   60
-
-#define DEFAULT_NEXT_FRAME_6X   365
-#define DEFAULT_NEXT_FRAME_6Y   100
+static const int DEFAULT_NEXT_FRAME_X[] = { 260, 295, 330, 365, 365, 365};
+static const int DEFAULT_NEXT_FRAME_Y[] = { 20, 20, 20, 20, 60, 100 };
 
 #define DEFAULT_SCORE_TEXTX     280
 #define DEFAULT_SCORE_TEXTY     210
@@ -101,19 +86,19 @@ image lines_frame;
 image level_frame;
 image hold_frame;
 
-sf2d_texture* tetriminos[7];
-sf2d_texture* blocks[7];
-sf2d_texture* score_num[10];
-sf2d_texture* misc_num[10];
-sf2d_texture* gameover_text;
-sf2d_texture* paused_text;
+C2D_Image tetriminos[7];
+C2D_Image blocks[7];
+C2D_Image score_num[10];
+C2D_Image misc_num[10];
+C2D_Image gameover_text;
+C2D_Image paused_text;
 
-sf2d_texture* tetris_indicator;
-sf2d_texture* tspin_indicator;
-sf2d_texture* tspinsingle_indicator;
-sf2d_texture* tspindouble_indicator;
-sf2d_texture* tspintriple_indicator;
-sf2d_texture* backtoback_indicator;
+C2D_Image tetris_indicator;
+C2D_Image tspin_indicator;
+C2D_Image tspinsingle_indicator;
+C2D_Image tspindouble_indicator;
+C2D_Image tspintriple_indicator;
+C2D_Image backtoback_indicator;
 
 s32 block_offset_holdx;
 s32 block_offset_holdy;

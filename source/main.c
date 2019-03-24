@@ -41,7 +41,7 @@ u32 KEY_DAS = KEY_R;
 u8 restartpls = 0;
 u8 config_lvl = 1;
 
-char theme_template[64] = "sdmc:/fbwodata/default/%s";
+char theme_template[64] = "romfs:/%s";
 
 void parse_config(FILE* config_file)
 {
@@ -166,7 +166,10 @@ void parse_config(FILE* config_file)
             if(!strcmp("theme", command))
             {
                 printf("theme %s\n", theme_folder_name);
-                sprintf(theme_template, "sdmc:/fbwodata/%s/%%s", theme_folder_name);
+                if(strcmp("default", theme_folder_name))
+                {
+                    sprintf(theme_template, "%s/%%s", theme_folder_name);
+                }
             }
         }
     }
@@ -346,6 +349,8 @@ void tetris_control(u32 kDown)
 int main()
 {
     graphics_init();
+    romfsInit();
+
     //init config w/ def. values
     cfg.DAS = 11;
     cfg.DAS_speed = 6;
@@ -371,13 +376,13 @@ int main()
     //load textures
 
     printf("reading config...\n");
-    FILE* config = fopen("sdmc:/fbwodata/config.cfg", "r");
+    FILE* config = fopen("config.cfg", "r");
     if(config != NULL)
         parse_config(config);
     else
         printf("failed to read config! default values will be used.\n");
 
-	audio_init(theme_template); //some of the loading operations will be in another thread so maybe it will be a bit faster
+    audio_init(theme_template); //some of the loading operations will be in another thread so maybe it will be a bit faster
 
     if(!load_textures(theme_template))
 		goto texture_error;
@@ -427,7 +432,6 @@ int main()
 		break;
             
         }
-	sf2d_swapbuffers();
     }
     if(restartpls)
 		goto init;
@@ -448,8 +452,9 @@ int main()
 
     exit:
     save_highscore();
-    printf("exitting...\n");
+    printf("exiting...\n");
     graphics_fini();
 	audio_fini();
+    romfsExit();
     return 0;
 }

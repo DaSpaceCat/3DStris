@@ -19,9 +19,9 @@
 #define MODE_MENU 2
 #define MODE_SETTINGS 3
 
-#include <sf2d.h>
 #include <stdio.h>
 #include <tremor/ivorbisfile.h>
+#include <citro2d.h>
 
 typedef enum { NONE, TETRIS, TSPIN, TSPINSINGLE, TSPINDOUBLE, TSPINTRIPLE} Indicator_to_render;
 
@@ -54,7 +54,7 @@ u32 ARE_delay; //frames between spawning another block
 }Configuration;
 
 typedef struct{
-sf2d_texture* texture;
+C2D_Image img;
 s32 posx;
 s32 posy;
 } image;
