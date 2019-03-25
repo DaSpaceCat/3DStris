@@ -210,6 +210,7 @@ void render_frame(int offset)
                         {
                             controllable = 0;
                         //placeholder animation
+                            u32 clear_color = C2D_Color32(rand() % 255, rand() % 255, rand() % 255, rand() % 255);
                             for(int i = 4; i < DIM_Y; ++i)
                             {
                                 if(full_lines[i])
@@ -220,7 +221,7 @@ void render_frame(int offset)
                                         0.5f,
                                         grid.img.subtex->width,
                                         blocks[0].subtex->height,
-                                        C2D_Color32(rand() % 255, rand() % 255, rand() % 255, rand() % 255)
+                                        clear_color
                                     );
                                 }
                             }
