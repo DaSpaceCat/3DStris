@@ -371,7 +371,7 @@ u8 ARS_glue_lock = 0;
 
 void save_highscore()
 {
-    char highscore_filename[] = "sdmc:/fbwodata/hiscore.bin";
+    char highscore_filename[] = "hiscore.bin";
     FILE* hs_file = fopen(highscore_filename, "wb");
     if(hs_file == NULL)
 	return;
@@ -384,7 +384,7 @@ void save_highscore()
 
 void load_highscore()
 {
-    char highscore_filename[] = "sdmc:/fbwodata/hiscore.bin";
+    char highscore_filename[] = "hiscore.bin";
     FILE* hs_file = fopen(highscore_filename, "rb");
     if(hs_file == NULL)
     {

@@ -13,14 +13,16 @@ void render_frames()
 	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 	C2D_TargetClear(top_left, C2D_Color32(0x00, 0x00, 0x00, 0xFF));
 	C2D_SceneBegin(top_left);
-	render_frame(0);
 
 	if(CONFIG_3D_SLIDERSTATE != 0)
 	{
+		render_frame(CONFIG_3D_SLIDERSTATE * 5.0f);
+
 		C2D_TargetClear(top_right, C2D_Color32(0x00, 0x00, 0x00, 0xFF));
 		C2D_SceneBegin(top_right);
-		render_frame(CONFIG_3D_SLIDERSTATE * 10.0f);
-	}
+		render_frame(CONFIG_3D_SLIDERSTATE * -5.0f);
+	} else
+		render_frame(0);
 	C3D_FrameEnd(0);
 }
 
