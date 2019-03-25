@@ -394,7 +394,6 @@ int load_textures(const char* str_template)
 	//these are not critical. if they are unavailable, I just won't render them, also for backwards compatibility.
 	if (num_images > 50)
 	{
-		printf("loading %d additional sprites.", num_images - 50);
 		tetris_indicator = C2D_SpriteSheetGetImage(spritesheet, idx++);
 		tspin_indicator = C2D_SpriteSheetGetImage(spritesheet, idx++);
 		tspinsingle_indicator = C2D_SpriteSheetGetImage(spritesheet, idx++);
@@ -453,98 +452,98 @@ void graphics_parse_config(char* theme_template)
         {
             if(!strcmp(command, "grid"))
             {
-                printf("grid = [%ld, %ld]\n", valx, valy);
+                dbgprintf("grid = [%ld, %ld]\n", valx, valy);
                 grid.posx = valx;
                 grid.posy = valy;
             }
 
             else if(!strcmp(command, "next_text"))
             {
-                printf("next_text = [%ld, %ld]\n", valx, valy);
+                dbgprintf("next_text = [%ld, %ld]\n", valx, valy);
                 next_text.posx = valx;
                 next_text.posy = valy;
             }
             else if(!strcmp(command, "next_frame0"))
             {
-                printf("next_frame0 = [%ld, %ld]\n", valx, valy);
+                dbgprintf("next_frame0 = [%ld, %ld]\n", valx, valy);
                 next_frame[0].posx = valx;
                 next_frame[0].posy = valy;
             }
             else if(!strcmp(command, "next_frame1"))
             {
-                printf("next_frame1 = [%ld, %ld]\n", valx, valy);
+                dbgprintf("next_frame1 = [%ld, %ld]\n", valx, valy);
                 next_frame[1].posx = valx;
                 next_frame[1].posy = valy;
             }
             else if(!strcmp(command, "next_frame2"))
             {
-                printf("next_frame2 = [%ld, %ld]\n", valx, valy);
+                dbgprintf("next_frame2 = [%ld, %ld]\n", valx, valy);
                 next_frame[2].posx = valx;
                 next_frame[2].posy = valy;
             }
             else if(!strcmp(command, "next_frame3"))
             {
-                printf("next_frame3 = [%ld, %ld]\n", valx, valy);
+                dbgprintf("next_frame3 = [%ld, %ld]\n", valx, valy);
                 next_frame[3].posx = valx;
                 next_frame[3].posy = valy;
             }
             else if(!strcmp(command, "next_frame4"))
             {
-                printf("next_frame4 = [%ld, %ld]\n", valx, valy);
+                dbgprintf("next_frame4 = [%ld, %ld]\n", valx, valy);
                 next_frame[4].posx = valx;
                 next_frame[4].posy = valy;
             }
             else if(!strcmp(command, "next_frame5"))
             {
-                printf("next_frame5 = [%ld, %ld]\n", valx, valy);
+                dbgprintf("next_frame5 = [%ld, %ld]\n", valx, valy);
                 next_frame[5].posx = valx;
                 next_frame[5].posy = valy;
             }
             else if(!strcmp(command, "score_text"))
             {
-                printf("score_text = [%ld, %ld]\n", valx, valy);
+                dbgprintf("score_text = [%ld, %ld]\n", valx, valy);
                 score_text.posx = valx;
                 score_text.posy = valy;
             }
             else if(!strcmp(command, "hiscore_text"))
             {
-                printf("hiscore_text = [%ld, %ld]\n", valx, valy);
+                dbgprintf("hiscore_text = [%ld, %ld]\n", valx, valy);
                 hiscore_text.posx = valx;
                 hiscore_text.posy = valy;
             }
             else if(!strcmp(command, "lines_frame"))
             {
-                printf("lines_frame = [%ld, %ld]\n", valx, valy);
+                dbgprintf("lines_frame = [%ld, %ld]\n", valx, valy);
                 lines_frame.posx = valx;
                 lines_frame.posy = valy;
             }
             else if(!strcmp(command, "level_frame"))
             {
-                printf("level_frame = [%ld, %ld]\n", valx, valy);
+                dbgprintf("level_frame = [%ld, %ld]\n", valx, valy);
                 level_frame.posx = valx;
                 level_frame.posy = valy;
             }
             else if(!strcmp(command, "hold_frame"))
             {
-                printf("hold_frame = [%ld, %ld]\n", valx, valy);
+                dbgprintf("hold_frame = [%ld, %ld]\n", valx, valy);
                 hold_frame.posx = valx;
                 hold_frame.posy = valy;
             }
             else if(!strcmp(command, "offset_next"))
             {
-                printf("offset_next = [%ld, %ld]\n", valx, valy);
+                dbgprintf("offset_next = [%ld, %ld]\n", valx, valy);
                 block_offset_nextx = valx;
                 block_offset_nexty = valy;
             }
             else if(!strcmp(command, "offset_hold"))
             {
-                printf("offset_hold = [%ld, %ld]\n", valx, valy);
+                dbgprintf("offset_hold = [%ld, %ld]\n", valx, valy);
                 block_offset_holdx = valx;
                 block_offset_holdy = valy;
             }
             else if(!strcmp(command, "indicators"))
             {
-                printf("indicators = [%ld, %ld]\n", valx, valy);
+                dbgprintf("indicators = [%ld, %ld]\n", valx, valy);
                 indicatorx = valx;
                 indicatory = valy;
             }
@@ -553,17 +552,17 @@ void graphics_parse_config(char* theme_template)
         {
 	    if(!strcmp(command, "lines_dig_off"))
             {
-                printf("lines digit offset = %ld\n", valx);
+                dbgprintf("lines digit offset = %ld\n", valx);
                 digit_offset_linesy = valx;
             }
 	    else if(!strcmp(command, "level_dig_off"))
             {
-                printf("level digit offset = %ld\n", valx);
+                dbgprintf("level digit offset = %ld\n", valx);
                 digit_offset_levely = valx;
             }
 	    else if(!strcmp(command, "indicator_frames"))
             {
-                printf("indicator frame time = %ld\n", valx);
+                dbgprintf("indicator frame time = %ld\n", valx);
                 indicator_frame_config = valx;
             }
 	}

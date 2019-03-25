@@ -19,6 +19,12 @@
 #define MODE_MENU 2
 #define MODE_SETTINGS 3
 
+#if 0
+#define dbgprintf(Fmt,...) printf(Fmt, ##__VA_ARGS__)
+#else
+#define dbgprintf(Fmt,...)
+#endif
+
 #include <stdio.h>
 #include <tremor/ivorbisfile.h>
 #include <citro2d.h>

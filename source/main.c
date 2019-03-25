@@ -57,7 +57,7 @@ void parse_config(FILE* config_file)
 	{
 	    if(!strcmp(command, "level\0") && val <= 20 && val > 0)
 	    {
-			printf("lvl %d: %d frms, %d rows, %d delay\n", val, val2, val3, val4);
+			dbgprintf("lvl %d: %d frms, %d rows, %d delay\n", val, val2, val3, val4);
 			cfg.frames_per_drop[val-1] = val2;
 			cfg.rows_per_drop[val-1] = val3;
 			cfg.glue_delay[val-1] = val4;
@@ -67,88 +67,88 @@ void parse_config(FILE* config_file)
         {
             if(!strcmp(command, "DAS\0"))
             {
-                printf("DAS delay = %d frames\n", val);
+                dbgprintf("DAS delay = %d frames\n", val);
                 cfg.DAS = val;
             }
             else if(!strcmp(command, "invisimode\0"))
             {
-                printf("invisimode: ");
+                dbgprintf("invisimode: ");
                 if(val)
-                    printf("on\n");
+                    dbgprintf("on\n");
                 else
-                    printf("off\n");
+                    dbgprintf("off\n");
                 cfg.invisimode = val;
             }
             else if(!strcmp(command, "hold\0"))
             {
-                printf("hold: ");
+                dbgprintf("hold: ");
                 if(val)
-                    printf("on\n");
+                    dbgprintf("on\n");
                 else
-                    printf("off\n");
+                    dbgprintf("off\n");
                 cfg.hold = val;
             }
             else if(!strcmp(command, "ghost_piece\0"))
             {
-                printf("ghost piece: ");
+                dbgprintf("ghost piece: ");
                 if(val)
-                    printf("on\n");
+                    dbgprintf("on\n");
                 else
-                    printf("off\n");
+                    dbgprintf("off\n");
                 cfg.ghost_piece = val;
             }
             else if(!strcmp(command, "r_hold\0"))
             {
-                printf("Hold button: ");
+                dbgprintf("Hold button: ");
                 if(val)
 		{
 		    KEY_HOLD = KEY_R;
 		    KEY_DAS = KEY_L;
-                    printf("R\n");
+                    dbgprintf("R\n");
 		}
                 else
-                    printf("L\n");
+                    dbgprintf("L\n");
             }
             else if(!strcmp(command, "ars\0"))
             {
-                printf("Rotation system: ");
+                dbgprintf("Rotation system: ");
                 if(val)
 		{
 		    cfg.ARS = 1;
-                    printf("ARS\n");
+                    dbgprintf("ARS\n");
 		}
                 else
-                    printf("SRS\n");
+                    dbgprintf("SRS\n");
             }
             else if(!strcmp(command, "next_displayed\0"))
 	    {
                 if(val >= 0 && val < 7)
                 {
-                    printf("next displayed pieces no. %d\n", val);
+                    dbgprintf("next displayed pieces no. %d\n", val);
                     cfg.next_displayed = val;
                 }
 	    }
 
             else if(!strcmp(command, "are_delay\0"))
             {
-                printf("ARE delay = %d frames\n", val);
+                dbgprintf("ARE delay = %d frames\n", val);
                 cfg.ARE_delay = val;
             }
             else if(!strcmp(command, "DAS_speed\0"))
             {
-                printf("DAS speed = %d frames\n", val);
+                dbgprintf("DAS speed = %d frames\n", val);
                 cfg.DAS_speed = val;
             }
             else if(!strcmp(command, "line_clear_frms\0"))
             {
-                printf("Line clear lasts = %d frames\n", val);
+                dbgprintf("Line clear lasts = %d frames\n", val);
                 cfg.line_clear_frames = val;
             }
             else if(!strcmp(command, "level\0"))
 	    {
                 if(level > 0 && level <= 20)
                 {
-                    printf("level = %d\n", val);
+                    dbgprintf("level = %d\n", val);
                     config_lvl = val;
                 }
 	    }
@@ -156,7 +156,7 @@ void parse_config(FILE* config_file)
 	    {
                 if(val > 0)
                 {
-                    printf("lines per level = %d\n", val);
+                    dbgprintf("lines per level = %d\n", val);
                     cfg.lines_per_lvl = val;
 		}
 	    }
@@ -165,7 +165,7 @@ void parse_config(FILE* config_file)
         {
             if(!strcmp("theme", command))
             {
-                printf("theme %s\n", theme_folder_name);
+                dbgprintf("theme %s\n", theme_folder_name);
                 if(strcmp("default", theme_folder_name))
                 {
                     sprintf(theme_template, "%s/%%s", theme_folder_name);
@@ -375,12 +375,14 @@ int main()
 
     //load textures
 
-    printf("reading config...\n");
+    printf("reading config...");
     FILE* config = fopen("config.cfg", "r");
-    if(config != NULL)
+    if(config != NULL) {
+        printf("\n");
         parse_config(config);
+    }
     else
-        printf("failed to read config! default values will be used.\n");
+        printf("failed to read config!\ndefault values will be used.\n");
 
     audio_init(theme_template); //some of the loading operations will be in another thread so maybe it will be a bit faster
 
