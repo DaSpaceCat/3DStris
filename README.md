@@ -1,4 +1,4 @@
-# fbwo-3ds
+# 3DStris
 
 <b>3DStris</b> is a 3DS homebrew Tetris clone, forked from Falling Blocks Watch Out
 
