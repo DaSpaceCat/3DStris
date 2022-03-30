@@ -1,6 +1,6 @@
-# fbwo-3ds
+# 3DStris
 
-<b>Falling Blocks Watch Out</b> is a 3DS homebrew Tetris clone.
+<b>3DStris</b> is a 3DS homebrew Tetris clone, forked from Falling Blocks Watch Out
 
 The aim was to create a homebrew game inspired by Tetris DS, seeing as it was one of the best Tetris installments on handhelds, without all the fanciness new games bring.
 
