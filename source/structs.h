@@ -26,7 +26,7 @@
 #endif
 
 #include <stdio.h>
-#include <tremor/ivorbisfile.h>
+#include <../tremor/ivorbisfile.h>
 #include <citro2d.h>
 
 typedef enum { NONE, TETRIS, TSPIN, TSPINSINGLE, TSPINDOUBLE, TSPINTRIPLE} Indicator_to_render;

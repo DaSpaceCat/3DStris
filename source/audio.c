@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <tremor/ivorbisfile.h>
+#include <../tremor/ivorbisfile.h>
 
 #include "structs.h"
 #include "audio.h"
